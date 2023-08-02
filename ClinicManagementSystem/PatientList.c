@@ -6,12 +6,21 @@
  */
 
 #include "PatientList.h"
+/* Initialization for Patient information*/
+void Patient_voidInit(patient * PatientPtr){
+    PatientPtr->age=0;
+    PatientPtr->ID =0;
+    PatientPtr->name[0] = 'N';
+    PatientPtr->s = 0;
+}
 
+/* Initialization for patient list */
 void List_voidInit(PatientsList * ListPtr){
     ListPtr->chain = NULL;
     ListPtr->size =0;
 }
 
+/*Add Patient at last place*/
 void List_voidAddLast(PatientsList *ListPtr,patient Copy_u32Data){
     node * NewNode = (node *) malloc(sizeof(node));
     // Validation to Allocation Memory
@@ -22,7 +31,7 @@ void List_voidAddLast(PatientsList *ListPtr,patient Copy_u32Data){
         if( ListPtr->chain == NULL){
             ListPtr->chain= NewNode;
         }
-        // Adding at the end
+        // Adding at the end by traversing to the end place.
         else{
             node *current = ListPtr->chain ;
             while(current->next != NULL)
@@ -36,7 +45,7 @@ void List_voidAddLast(PatientsList *ListPtr,patient Copy_u32Data){
     }
 }
 
-//push
+//push to first place
 void List_voidAddFirst(PatientsList *ListPtr,patient Copy_u32Data){
     node *temp = (node *) malloc(sizeof(node));
     // Validation to Allocation Memory
@@ -210,7 +219,7 @@ patient List_s32DeletePosition(PatientsList * ListPtr,u32 Copy_u32Position)
 	}
 }
 
-bool List_boolSearchbyID(PatientsList * ListPtr, patient Copy_u32Data){
+/*bool List_boolSearchbyID(PatientsList * ListPtr, patient Copy_u32Data){
     //if the list is empty
     if(ListPtr->chain == NULL){
         printf("List is Empty!!!\n");
@@ -234,14 +243,44 @@ bool List_boolSearchbyID(PatientsList * ListPtr, patient Copy_u32Data){
             return false;
         } // not found
     }
-    printf("The Old Patient Profile:\n");
+    printf("The Patient Profile:\n");
     List_voidPrintPatient(current->next->Pat);
 
     return true; // found
     
+}*/
+
+
+patient List_patientSearchbyID(PatientsList * ListPtr, patient Copy_u32Data){
+    //if the list is empty
+    if(ListPtr->chain == NULL){
+        printf("List is Empty!!!\n");
+        return Copy_u32Data; // patient not found
+    }
+    node *current = ListPtr->chain;
+    // if the list is 1 element
+    if(current->next == NULL && current->Pat.ID != Copy_u32Data.ID) {
+        printf("List With one Patient!!!\n");
+        return Copy_u32Data; // patient not found
+    }
+    if(current->Pat.ID==Copy_u32Data.ID){
+        List_voidPrintPatient(current->Pat);
+        return current->Pat;
+    }
+    while( current->next->Pat.ID != Copy_u32Data.ID ){
+        current= current->next;
+        if(current->next == NULL) {
+            printf("This ID(%d) is not Found!!\n",Copy_u32Data.ID);
+            return Copy_u32Data;
+        } // not found
+    }
+    List_voidPrintPatient(current->next->Pat);
+    return current->next->Pat; // found
 }
 
+
 bool List_boolEditPatient(PatientsList * ListPtr, patient Copy_patientData){
+    char gen[10];
     //if the list is empty
     if(ListPtr->chain == NULL){
         printf("List is Empty!!!\n");
@@ -254,8 +293,24 @@ bool List_boolEditPatient(PatientsList * ListPtr, patient Copy_patientData){
         return false; // value not found
     }
     if(current->Pat.ID==Copy_patientData.ID){
+        printf("The ID is exist.\n");
+        printf("The Old Patient Profile:\n");
+        List_voidPrintPatient(current->Pat);
+        /*Edit The patient Profile*/
+        printf("Please, Update patient profile.\n");
+        printf("Enter the name of the patient : ");  
+        scanf("%s",&Copy_patientData.name);
+	    printf("Enter the age of the patient : ");
+     	scanf("%d",&Copy_patientData.age);
+   		printf("Enter the gender of the patient[MALE or FEMALE] : ");
+        scanf("%s",&gen);
+        if(gen[0] == 'M' || gen[0]== 'm')
+            Copy_patientData.Gen = MALE;
+        else if(gen[0] == 'F' || gen[0] == 'f')
+            Copy_patientData.Gen = FEMALE;
+        Copy_patientData.s = current->Pat.s;
         current->Pat = Copy_patientData;
-        printf("Patient profile is updated successfully.\n\n"); 
+        
         return true;
     }
     while( current->next->Pat.ID != Copy_patientData.ID ){
@@ -265,8 +320,23 @@ bool List_boolEditPatient(PatientsList * ListPtr, patient Copy_patientData){
             return false;
         } // not found
     }
+    printf("The ID is exist.\n");
+    printf("The Old Patient Profile:\n");
+    List_voidPrintPatient(current->next->Pat);
+    /*Edit The patient Profile*/
+    printf("Please, Update patient profile.\n");
+    printf("Enter the name of the patient : ");  
+    scanf("%s",&Copy_patientData.name);
+	printf("Enter the age of the patient : ");
+    scanf("%d",&Copy_patientData.age);
+   	printf("Enter the gender of the patient[MALE or FEMALE] : ");
+    scanf("%s",&gen);
+    if(gen[0] == 'M' || gen[0]== 'm')
+        Copy_patientData.Gen = MALE;
+    else if(gen[0] == 'F' || gen[0] == 'f')
+        Copy_patientData.Gen = FEMALE;
+    Copy_patientData.s = PATIENT_IS_OK;
     current->next->Pat = Copy_patientData;
-    printf("Patient profile is updated successfully.\n\n"); 
     return true; // found
 }
 
@@ -289,28 +359,3 @@ u32 List_u32Size(PatientsList * ListPtr){
     return (ListPtr->size);
 }
 
-patient List_patientSearchbyID1(PatientsList * ListPtr, patient Copy_u32Data){
-    //if the list is empty
-    if(ListPtr->chain == NULL){
-        printf("List is Empty!!!\n");
-        return Copy_u32Data;
-    }
-    node *current = ListPtr->chain;
-    // if the list is 1 element
-    if(current->next == NULL && current->Pat.ID != Copy_u32Data.ID) {
-        printf("List With one Patient!!!\n");
-        return Copy_u32Data; // value not found
-    }
-    if(current->Pat.ID==Copy_u32Data.ID){
-        return current->Pat;
-    }
-    while( current->next->Pat.ID != Copy_u32Data.ID ){
-        current= current->next;
-        if(current->next == NULL) {
-            printf("This ID(%d) is not Found!!\n",Copy_u32Data.ID);
-            return Copy_u32Data;
-        } // not found
-    }
-
-    return current->next->Pat; // found
-}
